@@ -1,0 +1,20 @@
+#lang fudanmaku
+(define-pattern BoWaP-burst (start-angle)
+  (parallel i 0 -> 4
+    (bullet
+      #:position (list 0 0)       
+      #:direction (+ start-angle (* i 72.0))
+      #:speed 5)))
+
+(define-pattern BoWaP ()
+  (let ((angleT   (random-float 0 360))   ; 初始随机角度
+        (objcount 0))                     ; 发射帧计数
+    (sequential tick 0 -> 9999
+      (BoWaP-burst angleT)
+      (set! angleT
+            (+ angleT
+               (* 12 (sind objcount) (cosd objcount)))) ; sin·cos 波动
+      (set! objcount (+ objcount 1)))))
+
+(define-pattern top ()
+  (BoWaP))

@@ -1,0 +1,17 @@
+(define-pattern ring (offset radius count)
+  (let ((deg-step (/ 360.0 count)))
+    (sequential i 0 -> count
+      (let ((θ (+ offset (* i deg-step))))
+        (bullet
+          #:position (list (* radius (cosd θ))
+                           (* radius (sind θ)))
+          #:direction θ
+          #:speed 2)))))
+  
+
+(define-pattern top ()
+  (sequential _ 1 -> 100
+    (ring
+      0
+      100
+      100)))

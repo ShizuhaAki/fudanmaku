@@ -273,11 +273,21 @@
 
       ;; (every-frame n)
       [(modifier-every n-expr)
-       (define per (eval-val n-expr loc env))
-       (for ([k (in-naturals 1)]
-             #:break (>= (+ now (+ rel (* k per))) MAX-FRAMES)) ; break when out of frames
-         (define d (+ rel (* k per)))
-         (apply-and-schedule d))]
+       (define period (eval-val n-expr loc env))
+       ;; `prev` starts as the original bullet `b`
+       (let loop ([time (+ now rel)]  ; first target frame
+                  [prev b])            ; bullet state at last transform
+         (when (< time MAX-FRAMES)
+           ;; 1) Advance the bullet forward by `period`
+           (define bt (advance-bullet prev period))
+           ;; 2) Apply the transform to that advanced bullet
+           (define prods (apply-transform xdef bt env))
+           ;; 3) Pick the first produced bullet (or fall back to bt)
+           (define next (if (null? prods) bt (first prods)))
+           ;; 4) Schedule it at the target frame
+           (schedule-bullet-at sched time next)
+           ;; 5) Recurse for the next period
+           (loop (+ time period) next)))]
 
       ;; no modifier → transform happens immediately (delay = rel)
       [(modifier-none)

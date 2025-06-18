@@ -1,7 +1,17 @@
 # Fudanmaku
 Fudanmaku (**Fu**nctional **Danmaku**).
 
-## Workflow
-Fudanmaku programs are first interpreted, and then rendered.
+## Installation
+Fudanmaku reads source files (conventionally named with `.fdm`), and produces a S-expression based file describing, frame by frame, how bullets shall be placed (we call that the Fudanmaku Transfer Language, `.ftl`).
 
-The interpreter reads Fudanmaku source files (`.fdm`) and generate Fudanmaku Transfer Language files (`.ftl`). FTL files contain the actual data instructing renderers 
+Fudanmaku itself requires only pure Racket to run. However, to see your output visualized, you need to install the following Python packages:
+
+```
+pip3 install pygame sexpdata
+```
+
+After that, you may run and visualize your source file as such
+
+
+
+## Workflow

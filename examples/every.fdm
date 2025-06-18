@@ -1,6 +1,5 @@
 ;#lang fudanmaku
 
-;; Ring pattern now annotates each bullet with its index `i`
 (define-pattern ring (offset radius count index)
   (let ((deg-step (/ 360.0 count)))
     (parallel i 0 -> (add1 count)
@@ -13,31 +12,26 @@
           ;; stash the loop index so the transform can see it:
           #:i         index)))))
 
-;; Transform that turns right on even i, left on odd i
-(define-transform slow-down (bullet)
+
+(define-transform speed-shake (bullet)
   (update-bullet! bullet
     ;; compute a sign: +30 for even i (right‐turn), –30 for odd (left‐turn)
-    #:direction
-      (+ (get-attr bullet 'direction)
-         (if (even? (get-attr bullet 'i))
-             (* 5 (get-attr bullet 'i))
-             (* -5 (get-attr bullet 'i))))
-    #:speed 3))
+    #:speed (+ (get-attr bullet 'speed) 0.01)))
 
 ;; Combine ring + transform + delay
-(define-pattern ring-with-slow (offset radius count index after)
+(define-pattern ring-with-speed-shake (offset radius count index after)
   (transform
-    slow-down
-    (after-frame after)
+    speed-shake
+    (every-frame after)
     (ring offset radius count index)))
 
 ;; Fire ten waves, each one delayed 50 frames from the last
 (define-pattern top ()
-  (sequential wave 1 -> 50
-    (ring-with-slow
+  (sequential wave 1 -> 1
+    (ring-with-speed-shake
       0     ; offset
       0     ; radius
       12    ; bullets per ring
       wave  ; loop index
-      60)   ; transform delay
+      1)   ; transform delay
     (wait 30)))

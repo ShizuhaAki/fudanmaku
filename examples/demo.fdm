@@ -14,7 +14,7 @@
           #:i         index)))))
 
 ;; Transform that turns right on even i, left on odd i
-(define-transform slow-down (bullet)
+(define-transform turn-around (bullet)
   (update-bullet! bullet
     ;; compute a sign: +30 for even i (right‐turn), –30 for odd (left‐turn)
     #:direction
@@ -25,16 +25,16 @@
     #:speed 3))
 
 ;; Combine ring + transform + delay
-(define-pattern ring-with-slow (offset radius count index after)
+(define-pattern ring-with-turn (offset radius count index after)
   (transform
-    slow-down
+    turn-around
     (after-frame after)
     (ring offset radius count index)))
 
 ;; Fire ten waves, each one delayed 50 frames from the last
 (define-pattern top ()
   (sequential wave 1 -> 50
-    (ring-with-slow
+    (ring-with-turn
       0     ; offset
       0     ; radius
       12    ; bullets per ring

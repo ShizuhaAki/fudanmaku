@@ -10,15 +10,9 @@
 
 (provide evaluate-program)
 
-;; ---------------------------------------------------------------------
-;;  Global timeline
-;; ---------------------------------------------------------------------
 (define MAX-FRAMES 3600)
 (define (valid-frame? f) (< f MAX-FRAMES))
 
-;; ---------------------------------------------------------------------
-;;  Entry point
-;; ---------------------------------------------------------------------
 (define (evaluate-program decls)
   (define env   (build-env decls))
   (define sched (make-scheduler))
@@ -35,20 +29,13 @@
              [_ e]))
          (make-env)
          decls))
-;; ensure-uid : bullet produced-by-transform × bullet original → bullet'
-;;
-;; If the transform product already has a uid → leave it.
-;; Otherwise copy the uid from the original bullet.
-;;
+
 (define (ensure-uid product src)
   (define h (hash-copy (bullet-attrs product)))
   (unless (hash-has-key? h 'uid)
     (hash-set! h 'uid (hash-ref (bullet-attrs src) 'uid)))
   (make-bullet h))            ; funnel through make-bullet once
 
-;; ---------------------------------------------------------------------
-;;  Pattern evaluation
-;; ---------------------------------------------------------------------
 (define (eval-pattern pd args env sched)
   (define loc (make-hash))
   (for ([n (pattern-def-params pd)]
@@ -56,9 +43,6 @@
     (hash-set! loc n v))
   (eval-expr (pattern-def-body pd) loc env sched))
 
-;; ---------------------------------------------------------------------
-;;  Core expression evaluator
-;; ---------------------------------------------------------------------
 (define (eval-expr expr loc env sched)
   (match expr
     ;; bullet ------------------------------------------------------------------
@@ -126,10 +110,6 @@
     [(set-expr nm ve)
      (hash-set! loc nm (eval-val ve loc env))]
 
-    ;; ─────────────────────────────────────────────────────────────────────
-    ;; In your eval-expr, replace the old update-node clause with this:
-    ;; (update-node bullet-expr kv-pairs)
-    ;; ─────────────────────────────────────────────────────────────────────
     [(update-node b-expr kvs)
      ;; 1) Evaluate the bullet expression to get the source bullet
      (define src (eval-val b-expr loc env))
@@ -160,9 +140,7 @@
 
     [else (error 'eval-expr "Unhandled AST node: ~a" expr)]))
 
-;; ---------------------------------------------------------------------
-;;  Value evaluator
-;; ---------------------------------------------------------------------
+
 (define (eval-val ve loc env)
   (match ve
     [(num-lit n)            n]
@@ -209,9 +187,6 @@
   (for/fold ([newh (hash-copy h)]) ([kv kvs])
     (hash-set newh (car kv) (cdr kv))))
 
-;; ---------------------------------------------------------------------
-;;  Bullet helpers
-;; ---------------------------------------------------------------------
 (define (attrs->hash attrs loc env)
   (define h (make-hash))
   (for ([a attrs])
@@ -220,21 +195,7 @@
                (eval-val (bullet-attr-value-expr a) loc env)))
   h)
 
-;; ---------------------------------------------------------------------
-;;  Transform evaluation (corrected)
-;; ---------------------------------------------------------------------
-;; ─────────────────────────────────────────────────────────────────────
-;; eval-transform : Symbol × Modifier × Expr × Loc × Env × Scheduler → void
-;;
-;; For every bullet B emitted by SUB at frame F₀:
-;;   • Let D be the delay determined by the modifier.
-;;   • Advance B forward by D frames (using its current speed/dir) → Bₜ
-;;   • Apply the transform definition to Bₜ  →  zero/one/many products
-;;   • Schedule each product **unchanged** at frame F₀ + D
-;;
-;; The *original* bullet is NOT rescheduled here—it was already scheduled
-;; by the sub-pattern and continues moving until the transform frame.
-;; ─────────────────────────────────────────────────────────────────────
+
 (define (eval-transform name mod sub loc env sched)
   (define now (scheduler-current-frame sched))
 
@@ -264,7 +225,6 @@
         (for ([p products])
           (schedule-bullet-at sched tgt p))))
 
-    ;; ─── Modifier dispatch ───────────────────────────────────────────
     (match mod
       ;; (after-frame n)
       [(modifier-after n-expr)
@@ -307,9 +267,6 @@
         [else '()]))  ; nothing produced
 
 
-;; ---------------------------------------------------------------------
-;;  Bullet physics helpers
-;; ---------------------------------------------------------------------
 (define (deg->rad d) (* pi (/ d 180.0)))
 
 (define (advance-bullet b n)

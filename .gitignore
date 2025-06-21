@@ -144,3 +144,6 @@ Desktop.ini
 
 # Fudanmaku FTL files
 *.ftl
+
+# Course Report
+*.pdf

@@ -6,14 +6,12 @@
       #:speed 5)))
 
 (define-pattern BoWaP ()
-  (let ((angleT   (random-float 0 360))   ; 初始随机角度
-        (objcount 0))                     ; 发射帧计数
+  (let ((angleT   (random-float 0 360)))                     ; 发射帧计数
     (sequential tick 0 -> 9999
       (BoWaP-burst angleT)
       (set! angleT
             (+ angleT
-               (* 12 (sind objcount) (cosd objcount)))) ; sin·cos 波动
-      (set! objcount (+ objcount 1)))))
+               (* 12 (sind tick) (cosd tick)))))))
 
 (define-pattern top ()
   (BoWaP))

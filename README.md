@@ -1,6 +1,8 @@
 # Fudanmaku
 Fudanmaku (**Fu**nctional **Danmaku**) is a simple functional DSL for describing Danmaku (bullet hell) patterns.
 
+[Workshop write-up (PDF)](FuDanmaku-Paper.pdf)
+
 [toc]
 
 ## Getting Started
